@@ -3,7 +3,6 @@ const shelfKanaps = document.getElementById("items"); //defining a variable in t
 fetch("http://localhost:3000/api/products/") //request to import data by API
 	.then((res) => res.json()) //received data into JSON format
 	.then((data) => {
-		//JSON data is named "data" to be used as an array
 		for (let uniq of data) {
 			//loop to import each field from the JSON and assign it a variable
 			const idKanap = uniq._id;
