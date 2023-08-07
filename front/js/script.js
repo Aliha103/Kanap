@@ -1,16 +1,16 @@
-const shelfKanaps = document.getElementById("items"); //defining a variable in the area affected HTML
+const zoneKanaps = document.getElementById("items"); //defining a variable in the area affected HTML
 
 fetch("http://localhost:3000/api/products/") //request to import data by API
 	.then((res) => res.json()) //received data into JSON format
 	.then((data) => {
-		for (let uniq of data) {
+		for (let champ of data) {
 			//loop to import each field from the JSON and assign it a variable
-			const idKanap = uniq._id;
-			const photoKanap = uniq.imageUrl;
-			const altTexte = uniq.altTxt;
-			const nomKanap = uniq.name;
-			const speechKanap = uniq.description;
-			shelfKanaps.innerHTML += `<a href="./product.html?id=${idKanap}">
+			const idKanap = champ._id;
+			const photoKanap = champ.imageUrl;
+			const altTexte = champ.altTxt;
+			const nomKanap = champ.name;
+			const speechKanap = champ.description;
+			zoneKanaps.innerHTML += `<a href="./product.html?id=${idKanap}">
         <article>
           <img src="${photoKanap}" alt="${altTexte}">
             <h3 class="productName">${nomKanap}</h3>
