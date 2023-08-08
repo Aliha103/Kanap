@@ -1,8 +1,11 @@
-const basketValue = JSON.parse(localStorage.getItem("kanapLs"));
+// Retrieve the "id" query parameter from the current URL
+const kanapPageId = new URLSearchParams(window.location.search).get("id");
+
+const basketValue = JSON.parse(localStorage.getItem("kanapLS"));
 
 const fetchApi = async () => {
   // Retrieve the cart items from LocalStorage, or initialize an empty array if it's null
-  const basketClassFull = JSON.parse(localStorage.getItem("kanapLs")) || [];
+  const basketClassFull = JSON.parse(localStorage.getItem("kanapLS")) || [];
 
   // Create an array to store the fetched objects
   const basketArrayFull = await Promise.all(
@@ -45,7 +48,7 @@ const showBasket = async () => {
   const responseFetch = await fetchApi();
 
   // Retrieve the items from the local storage
-  const basketValue = JSON.parse(localStorage.getItem("kanapLs"));
+  const basketValue = JSON.parse(localStorage.getItem("kanapLS"));
 
   // Check if there are items in the basket
   if (basketValue !== null && basketValue.length !== 0) {
@@ -83,6 +86,82 @@ const showBasket = async () => {
   }
 };
 // localstorage recovery function//
-const getBasket = () => JSON.parse(localStorage.getItem("kanapLs"));
+const getBasket = () => JSON.parse(localStorage.getItem("kanapLS"));
 
 /// for changing the number of items in cart ///
+async function modifyQuantity() {
+  await fetchApi(); //Wait for the fetch to be finished
+  const quantityInCart = document.querySelectorAll(".itemQuantity");
+  for (let input of quantityInCart) {
+    input.addEventListener("change", function () {
+      //Listening for the quantity change.
+      let basketValue = getBasket();
+      //getting the ID of the modified data
+      let idModif = this.closest(".cart__item").dataset.id;
+      //getting the color of the modified data
+      let colorModif = this.closest(".cart__item").dataset.color;
+      //filter the List with the ID of the modified sofa
+      let findId = basketValue.filter((e) => e.idSelectedProduct === idModif);
+      //looking for the sofa with the same ID by its color
+      let findColor = findId.find((e) => e.colorSelectedProduct === colorModif);
+      if (this.value > 0) {
+        // If the color and ID are found, we modify the quantity accordingly
+        findColor.quantity = this.value;
+        //push the cart into the local storage
+        localStorage.setItem("kanapLS", JSON.stringify(basketValue));
+        calculQtyTotal();
+        calculPrixTotal();
+      } else {
+        calculQtyTotal();
+        calculPrixTotal();
+      }
+      localStorage.setItem("kanapLS", JSON.stringify(basketValue));
+    });
+  }
+}
+
+///deleting the items by delete button ///
+async function removeItem() {
+  await fetchApi();
+  const kanapDelete = document.querySelectorAll(".deleteItem");
+
+  kanapDelete.forEach((article) => {
+    article.addEventListener("click", function (event) {
+      let basketValue = getBasket();
+      const { idDelete, colorDelete } = event.target.closest("article").dataset;
+
+      basketValue = basketValue.filter(
+        (item) =>
+          item.idSelectedProduct !== idDelete ||
+          item.colorSelectedProduct !== colorDelete
+      );
+
+      localStorage.setItem("kanapLS", JSON.stringify(basketValue));
+      const getSection = document.querySelector("#cart__items");
+      getSection.removeChild(event.target.closest("article"));
+      alert("Article deleted!");
+      calculQtyTotal();
+      calculPrixTotal();
+    });
+  });
+
+  if (!getBasket()?.length) {
+    localStorage.clear();
+    return messagePanierVide();
+  }
+}
+
+removeItem();
+
+/// Initialization of the functions ///////////
+
+initialize();
+
+async function initialize() {
+  showBasket(); ////// Displaying the DOM (with a reminder of the fetchApi) //////
+  removeItem(); ////// Dynamic removal of items from the cart and...
+  modifyQuantity(); ////// Modification of quantities
+
+  calculQtyTotal(); ////// Dynamic update of quantities and total prices
+  calculPrixTotal();
+}
