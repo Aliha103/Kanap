@@ -154,7 +154,6 @@ async function removeItem() {
 removeItem();
 
 /// Initialization of the functions ///////////
-
 initialize();
 
 async function initialize() {
@@ -165,3 +164,17 @@ async function initialize() {
   calculQtyTotal(); ////// Dynamic update of quantities and total prices
   calculPrixTotal();
 }
+/// Message if the cart is empty //
+const messagePanierVide = () => {
+    const cartTitle = document.querySelector(
+      "#limitedWidthBlock div.cartAndFormContainer > h1"
+    );
+    const emptyCartMessage = "Oops! Your cart is empty !";
+    
+    cartTitle.textContent = emptyCartMessage;
+    cartTitle.style.fontSize = "40px";
+    
+    document.querySelector(".cart__order").style.display = "none";
+    document.querySelector(".cart__price").style.display = "none";
+  };
+  
