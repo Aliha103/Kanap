@@ -82,3 +82,7 @@ const showBasket = async () => {
     return messageEmptyBasket();
   }
 };
+// localstorage recovery function//
+const getBasket = () => JSON.parse(localStorage.getItem("kanapLs"));
+
+/// for changing the number of items in cart ///
