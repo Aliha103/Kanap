@@ -89,28 +89,32 @@ async function modifyQuantity() {
   const quantityInCart = document.querySelectorAll(".itemQuantity");
   for (let input of quantityInCart) {
     input.addEventListener("change", function () {
-      //Listening for the quantity change.
+      // Listening for the quantity change.
       let basketValue = getBasket();
-      //getting the ID of the modified data
+      // Getting the ID of the modified data
       let idModif = this.closest(".cart__item").dataset.id;
-      //getting the color of the modified data
+      // Getting the color of the modified data
       let colorModif = this.closest(".cart__item").dataset.color;
-      //filter the List with the ID of the modified sofa
+      // Filter the List with the ID of the modified sofa
       let findId = basketValue.filter((e) => e.idSelectedProduct === idModif);
-      //looking for the sofa with the same ID by its color
+      // Looking for the sofa with the same ID by its color
       let findColor = findId.find((e) => e.colorSelectedProduct === colorModif);
+
       if (this.value > 0) {
         // If the color and ID are found, we modify the quantity accordingly
-        findColor.quantity = this.value;
-        //push the cart into the local storage
-        localStorage.setItem("kanapLs", JSON.stringify(basketValue));
+        if (findColor) {
+          findColor.quantity = this.value;
+          // Push the cart into the local storage
+          localStorage.setItem("kanapLs", JSON.stringify(basketValue));
+        }
+        // Update the quantities and total price
         calculQtyTotal();
         calculPrixTotal();
       } else {
+        // Update the quantities and total price
         calculQtyTotal();
         calculPrixTotal();
       }
-      localStorage.setItem("kanapLs", JSON.stringify(basketValue));
     });
   }
 }
