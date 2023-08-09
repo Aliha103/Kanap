@@ -41,11 +41,11 @@ fetch(`http://localhost:3000/api/products/${kanapPageId}`)
       };
 
       // Function to retrieve the cart from LocalStorage
-      const getBasket = () => JSON.parse(localStorage.getItem("kanapLS")) || [];
+      const getBasket = () => JSON.parse(localStorage.getItem("kanapLs")) || [];
 
       // Function to save the cart to LocalStorage
       const saveBasket = (basketValue) => {
-        localStorage.setItem("kanapLS", JSON.stringify(basketValue));
+        localStorage.setItem("kanapLs", JSON.stringify(basketValue));
       };
 
       // Adding the product to the cart
