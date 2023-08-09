@@ -166,15 +166,175 @@ async function initialize() {
 }
 /// Message if the cart is empty //
 const messagePanierVide = () => {
-    const cartTitle = document.querySelector(
-      "#limitedWidthBlock div.cartAndFormContainer > h1"
-    );
-    const emptyCartMessage = "Oops! Your cart is empty !";
-    
-    cartTitle.textContent = emptyCartMessage;
-    cartTitle.style.fontSize = "40px";
-    
-    document.querySelector(".cart__order").style.display = "none";
-    document.querySelector(".cart__price").style.display = "none";
-  };
-  
+  const cartTitle = document.querySelector(
+    "#limitedWidthBlock div.cartAndFormContainer > h1"
+  );
+  const emptyCartMessage = "Oops! Your cart is empty !";
+
+  cartTitle.textContent = emptyCartMessage;
+  cartTitle.style.fontSize = "40px";
+
+  document.querySelector(".cart__order").style.display = "none";
+  document.querySelector(".cart__price").style.display = "none";
+};
+
+////Function to calculate the total quantity and price for the cart////
+
+const calculQtyTotal = () => {
+  const basketValue = getBasket();
+  const zoneTotalQuantity = document.querySelector("#totalQuantity");
+  const quantityInBasket =
+    basketValue?.map((item) => parseInt(item.quantity)) || [];
+  const totalQuantity = quantityInBasket.reduce(
+    (accumulator, currentValue) => accumulator + currentValue,
+    0
+  );
+
+  if (totalQuantity === 0) {
+    messagePanierVide();
+  } else {
+    zoneTotalQuantity.textContent = totalQuantity;
+  }
+};
+async function calculPrixTotal() {
+  const responseFetch = await fetchApi();
+  let basketValue = getBasket();
+  const zoneTotalPrice = document.querySelector("#totalPrice");
+  finalTotalPrice = [];
+  for (let p = 0; p < responseFetch.length; p++) {
+    //Product of the unit price and quantity
+    let sousTotal =
+      parseInt(responseFetch[p].quantity) * parseInt(responseFetch[p].price);
+    finalTotalPrice.push(sousTotal);
+
+    const reducer = (accumulator, currentValue) => accumulator + currentValue; // Sum of the prices in the array using reduce
+    zoneTotalPrice.textContent = finalTotalPrice.reduce(reducer, 0); //Setting the initial value to 0 to avoid an error when the cart is empty
+    localStorage.setItem("kanapLS", JSON.stringify(basketValue));
+  }
+}
+modifyQuantity();
+removeItem();
+
+//push the cart into the local storage
+localStorage.setItem("kanapLs", JSON.stringify(basketValue));
+
+///////////////// FORM ///////////////////////////////////////////////
+
+// Declaration of different input fields and error message areas //
+
+const zoneFirstNameErrorMsg = document.querySelector("#firstNameErrorMsg");
+const zoneLastNameErrorMsg = document.querySelector("#lastNameErrorMsg");
+const zoneAddressErrorMsg = document.querySelector("#addressErrorMsg");
+const zoneCityErrorMsg = document.querySelector("#cityErrorMsg");
+const zoneEmailErrorMsg = document.querySelector("#emailErrorMsg");
+
+const inputFirstName = document.getElementById("firstName");
+const inputLastName = document.getElementById("lastName");
+const inputAddress = document.getElementById("address");
+const inputCity = document.getElementById("city");
+const inputEmail = document.getElementById("email");
+
+// Declaration of regular expressions for form input validation //
+
+const regexFirstName = /^[a-zA-Z]+(?:[\s-][a-zA-Z]+)*$/;
+const regexLastName = regexFirstName;
+const regexAddress = /^[#.0-9a-zA-ZÀ-ÿ\s,-]{2,60}$/;
+const regexCity = regexFirstName;
+const regexEmail =
+  /^[_a-z0-9-]+(.[_a-z0-9-]+)*@[a-z0-9-]+(.[a-z0-9-]+)*(.[a-z]{2,4})$/;
+
+// Listening to the click on the ORDER button //
+
+const zoneOrderButton = document.querySelector("#order");
+
+zoneOrderButton.addEventListener("click", function (e) {
+  e.preventDefault(); //Prevent the form from functioning by default if no content is provided
+
+  // Retrieving the inputs from the form //
+
+  let checkFirstName = inputFirstName.value;
+  let checkLastName = inputLastName.value;
+  let checkAddress = inputAddress.value;
+  let checkCity = inputCity.value;
+  let checkEmail = inputEmail.value;
+
+  // Implementation of the validation conditions for the form fields //
+
+  function orderValidation() {
+    let basketValue = getBasket();
+
+    // If an error is found, a message is returned, and the value 'false' as well //
+
+    if (
+      regexFirstName.test(checkFirstName) == false ||
+      checkFirstName === null
+    ) {
+      zoneFirstNameErrorMsg.innerHTML = "Please enter a valid first name";
+      return false;
+    } else if (
+      regexLastName.test(checkLastName) == false ||
+      checkLastName === null
+    ) {
+      zoneLastNameErrorMsg.innerHTML = "Please enter a valid family name";
+      return false;
+    } else if (
+      regexAddress.test(checkAddress) == false ||
+      checkAddress === null
+    ) {
+      zoneAddressErrorMsg.innerHTML =
+        "Please enter a valid address (Number, street, street name, postal code).";
+      return false;
+    } else if (regexCity.test(checkCity) == false || checkCity === null) {
+      zoneCityErrorMsg.innerHTML = "Please enter a valid city name.";
+      return false;
+    } else if (regexEmail.test(checkEmail) == false || checkEmail === null) {
+      zoneEmailErrorMsg.innerHTML = "Please provide a valid email address.";
+      return false;
+    }
+    // If all the fields of the form are correctly filled //
+    else {
+      // create a contact object for sending through the API//
+
+      let contact = {
+        firstName: checkFirstName,
+        lastName: checkLastName,
+        address: checkAddress,
+        city: checkCity,
+        email: checkEmail,
+      };
+
+      // create an empty array that will store the items from the cart to send to the API //
+
+      let products = [];
+
+      //  POST request only takes into account the IDs of the products in the cart //
+      // Only push the IDs of the sofas in the cart into the created array //
+
+      for (let canapId of basketValue) {
+        products.push(canapId.idSelectedProduct);
+      }
+
+      // creating the object containing the order information //
+
+      let finalOrderObject = { contact, products };
+
+      // Retrieval of the order ID after the POST fetch to the API //
+
+      const orderId = fetch("http://localhost:3000/api/products/order", {
+        method: "POST",
+        body: JSON.stringify(finalOrderObject),
+        headers: {
+          "Content-type": "application/json",
+        },
+      });
+      orderId.then(async function (response) {
+        // API response //
+        const retour = await response.json();
+        //return to the confirmation page with the order ID //
+        window.location.href = `confirmation.html?orderId=${retour.orderId}`;
+      });
+    }
+  }
+
+  orderValidation();
+});
