@@ -90,7 +90,16 @@ async function modifyQuantity() {
 
   for (let input of quantityInCart) {
     input.addEventListener("change", function () {
- 
+      //Listening for the quantity change.
+      let basketValue = getBasket();
+      //getting the ID of the modified data
+      let idModif = this.closest(".cart__item").dataset.id;
+      //getting the color of the modified data
+      let colorModif = this.closest(".cart__item").dataset.color;
+      //filter the List with the ID of the modified sofa
+      let findId = basketValue.filter((e) => e.idSelectedProduct === idModif);
+      //looking for the sofa with the same ID by its color
+      let findColor = findId.find((e) => e.colorSelectedProduct === colorModif);
 
       if (this.value > 0) {
         // If the color and ID are found, we modify the quantity accordingly
@@ -125,8 +134,7 @@ async function removeItem() {
       const { id, color } = event.target.closest("article").dataset;
       basketValue = basketValue.filter(
         (item) =>
-          item.idSelectedProduct !== id ||
-          item.colorSelectedProduct !== color
+          item.idSelectedProduct !== id || item.colorSelectedProduct !== color
       );
 
       console.log("basketValue after filter", basketValue);
@@ -212,19 +220,17 @@ async function initialize() {
 }
 
 // Declaration of different input fields and error message areas //
-const elements = {
-  zoneFirstNameErrorMsg: document.querySelector("#firstNameErrorMsg"),
-  zoneLastNameErrorMsg: document.querySelector("#lastNameErrorMsg"),
-  zoneAddressErrorMsg: document.querySelector("#addressErrorMsg"),
-  zoneCityErrorMsg: document.querySelector("#cityErrorMsg"),
-  zoneEmailErrorMsg: document.querySelector("#emailErrorMsg"),
+const zoneFirstNameErrorMsg = document.querySelector("#firstNameErrorMsg");
+const zoneLastNameErrorMsg = document.querySelector("#lastNameErrorMsg");
+const zoneAddressErrorMsg = document.querySelector("#addressErrorMsg");
+const zoneCityErrorMsg = document.querySelector("#cityErrorMsg");
+const zoneEmailErrorMsg = document.querySelector("#emailErrorMsg");
 
-  inputFirstName: document.getElementById("firstName"),
-  inputLastName: document.getElementById("lastName"),
-  inputAddress: document.getElementById("address"),
-  inputCity: document.getElementById("city"),
-  inputEmail: document.getElementById("email"),
-};
+const inputFirstName = document.getElementById("firstName");
+const inputLastName = document.getElementById("lastName");
+const inputAddress = document.getElementById("address");
+const inputCity = document.getElementById("city");
+const inputEmail = document.getElementById("email");
 // Declaration of regular expressions for form input validation //
 
 const regexFirstName = /^[a-zA-Z]+(?:[\s-][a-zA-Z]+)*$/;
@@ -239,59 +245,79 @@ const regexEmail =
 const zoneOrderButton = document.querySelector("#order");
 
 // Add a click event listener to the order button
-zoneOrderButton.addEventListener("click", async (e) => {
-  e.preventDefault(); // Prevent the default form submission behavior
+zoneOrderButton.addEventListener("click", function (e) {
+  e.preventDefault(); //Prevent the form from functioning by default if no content is provided
 
-  // Collect input values from the form fields
-  const inputValues = {
-    firstName: inputFirstName.value,
-    lastName: inputLastName.value,
-    address: inputAddress.value,
-    city: inputCity.value,
-    email: inputEmail.value,
-  };
+  // Retrieving the inputs from the form //
+  let checkFirstName = inputFirstName.value;
+  let checkLastName = inputLastName.value;
+  let checkAddress = inputAddress.value;
+  let checkCity = inputCity.value;
+  let checkEmail = inputEmail.value;
 
-  // Error messages corresponding to each input field
-  const errors = {
-    firstName: "Please enter a valid first name",
-    lastName: "Please enter a valid family name",
-    address:
-      "Please enter a valid address (Number, street, street name, postal code).",
-    city: "Please enter a valid city name.",
-    email: "Please provide a valid email address.",
-  };
+  // Implementation of the validation conditions for the form fields //
 
-  let isValid = true; // Flag to track form validity
+  function orderValidation() {
+    let basketValue = getBasket();
 
-  // Loop through input fields and validate them
-  Object.keys(inputValues).forEach((key) => {
-    const inputValue = inputValues[key];
-    const errorMsg = errors[key];
-    const inputRegex = key === "email" ? regexEmail : regexFirstName;
+    // If an error is found, a message is returned, and the value 'false' as well //
 
-    // Check if input value is valid based on regex and not null
-    if (!inputRegex.test(inputValue) || inputValue === null) {
-      document.querySelector(`#${key}ErrorMsg`).innerHTML = errorMsg;
-      isValid = false;
+    if (
+      regexFirstName.test(checkFirstName) == false ||
+      checkFirstName === null
+    ) {
+      zoneFirstNameErrorMsg.innerHTML = "Please enter a valid first name";
+      return false;
+    } else if (
+      regexLastName.test(checkLastName) == false ||
+      checkLastName === null
+    ) {
+      zoneLastNameErrorMsg.innerHTML = "Please enter a valid family name";
+      return false;
+    } else if (
+      regexAddress.test(checkAddress) == false ||
+      checkAddress === null
+    ) {
+      zoneAddressErrorMsg.innerHTML =
+        "Please enter a valid address (Number, street, street name, postal code).";
+      return false;
+    } else if (regexCity.test(checkCity) == false || checkCity === null) {
+      zoneCityErrorMsg.innerHTML = "Please enter a valid city name.";
+      return false;
+    } else if (regexEmail.test(checkEmail) == false || checkEmail === null) {
+      zoneEmailErrorMsg.innerHTML = "Please provide a valid email address.";
+      return false;
     }
-  });
+    // If all the fields of the form are correctly filled //
+    else {
+      // create a contact object for sending through the API//
 
-  // If form inputs are valid
-  if (isValid) {
-    const basketValue = getBasket();
+      let contact = {
+        firstName: checkFirstName,
+        lastName: checkLastName,
+        address: checkAddress,
+        city: checkCity,
+        email: checkEmail,
+      };
 
-    // Extract product IDs from basket items
-    const products = basketValue.map((item) => item.idSelectedProduct);
+      // create an empty array that will store the items from the cart to send to the API //
 
-    // Create the final order object to be sent to the API
-    const finalOrderObject = {
-      contact: inputValues,
-      products: products,
-    };
+      let products = [];
 
-    try {
-      // Send POST request to the API to place the order
-      const response = await fetch("http://localhost:3000/api/products/order", {
+      //  POST request only takes into account the IDs of the products in the cart //
+      // Only push the IDs of the sofas in the cart into the created array //
+
+      for (let canapId of basketValue) {
+        products.push(canapId.idSelectedProduct);
+      }
+
+      // creating the object containing the order information //
+
+      let finalOrderObject = { contact, products };
+
+      // Retrieval of the order ID after the POST fetch to the API //
+
+      const orderId = fetch("http://localhost:3000/api/products/order", {
         method: "POST",
         body: JSON.stringify(finalOrderObject),
         headers: {
@@ -299,11 +325,16 @@ zoneOrderButton.addEventListener("click", async (e) => {
         },
       });
 
-      const retour = await response.json();
-      // Redirect to confirmation page with the order ID
-      window.location.href = `confirmation.html?orderId=${retour.orderId}`;
-    } catch (error) {
-      console.error(error);
+      orderId.then(async function (response) {
+        // API response //
+        const retour = await response.json();
+        // Clear the cart by removing items from local storage
+        localStorage.removeItem("kanapLs");
+        // Navigate to the confirmation page with the order ID
+        window.location.href = `confirmation.html?orderId=${retour.orderId}`;
+      });
     }
   }
+
+  orderValidation();
 });
