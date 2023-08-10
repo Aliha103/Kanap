@@ -53,7 +53,7 @@ const showBasket = async () => {
     // Loop through each product in the fetched response
     responseFetch.forEach((product) => {
       // Generate HTML content for each product and append it to the cart container
-      zoneBasket.innerHTML += `<article class="cart__item" data-id="${product.id}" data-color="${product.color}">
+      zoneBasket.innerHTML += `<article class="cart__item" data-id="${product._id}" data-color="${product.color}">
               <div class="cart__item__img">
                 <img src="${product.img}" alt="Image of a sofa">
               </div>
@@ -85,32 +85,27 @@ const getBasket = () => JSON.parse(localStorage.getItem("kanapLs"));
 
 // modifying the number of items in the cart
 async function modifyQuantity() {
-  await fetchApi(); //Wait for the fetch to be finished
+  await fetchApi(); // Wait for the fetch to be finished
   const quantityInCart = document.querySelectorAll(".itemQuantity");
+
   for (let input of quantityInCart) {
     input.addEventListener("change", function () {
-      // Listening for the quantity change.
-      let basketValue = getBasket();
-      // Getting the ID of the modified data
-      let idModif = this.closest(".cart__item").dataset.id;
-      // Getting the color of the modified data
-      let colorModif = this.closest(".cart__item").dataset.color;
-      // Filter the List with the ID of the modified sofa
-      let findId = basketValue.filter((e) => e.idSelectedProduct === idModif);
-      // Looking for the sofa with the same ID by its color
-      let findColor = findId.find((e) => e.colorSelectedProduct === colorModif);
+ 
 
       if (this.value > 0) {
         // If the color and ID are found, we modify the quantity accordingly
         if (findColor) {
           findColor.quantity = this.value;
-          // Push the cart into the local storage
+          // Update the basketValue and save it to local storage
           localStorage.setItem("kanapLs", JSON.stringify(basketValue));
         }
+
         // Update the quantities and total price
         calculQtyTotal();
         calculPrixTotal();
       } else {
+        // Update the basketValue and save it to local storage
+        localStorage.setItem("kanapLs", JSON.stringify(basketValue));
         // Update the quantities and total price
         calculQtyTotal();
         calculPrixTotal();
@@ -118,6 +113,7 @@ async function modifyQuantity() {
     });
   }
 }
+
 // remove item from the cart//
 async function removeItem() {
   await fetchApi();
@@ -126,14 +122,14 @@ async function removeItem() {
   kanapDelete.forEach((article) => {
     article.addEventListener("click", function (event) {
       let basketValue = getBasket();
-      const { idDelete, colorDelete } = event.target.closest("article").dataset;
-
+      const { id, color } = event.target.closest("article").dataset;
       basketValue = basketValue.filter(
         (item) =>
-          item.idSelectedProduct !== idDelete ||
-          item.colorSelectedProduct !== colorDelete
+          item.idSelectedProduct !== id ||
+          item.colorSelectedProduct !== color
       );
 
+      console.log("basketValue after filter", basketValue);
       localStorage.setItem("kanapLs", JSON.stringify(basketValue));
       const getSection = document.querySelector("#cart__items");
       getSection.removeChild(event.target.closest("article"));

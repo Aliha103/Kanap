@@ -57,6 +57,7 @@ fetch(`http://localhost:3000/api/products/${kanapPageId}`)
             item.colorSelectedProduct === product.colorSelectedProduct
         );
 
+        console.log("foundprofucrt", foundProduct);
         if (!foundProduct) {
           if (product.colorSelectedProduct === "") {
             alert("Please choose a color.");
@@ -76,10 +77,14 @@ fetch(`http://localhost:3000/api/products/${kanapPageId}`)
           let newQuantity =
             parseInt(foundProduct.quantity) + parseInt(product.quantity);
           foundProduct.quantity = newQuantity;
-          saveBasket(basketValue);
-          alert(
-            `The quantity of the ${product.colorSelectedProduct} ${product.nameSelectedProduct} sofa has been updated in your cart. New quantity: ${foundProduct.quantity}.`
-          );
+          if (foundProduct.quantity > 100) {
+            alert("Your quantity is above 100.");
+          } else {
+            saveBasket(basketValue);
+            alert(
+              `The quantity of the ${product.colorSelectedProduct} ${product.nameSelectedProduct} sofa has been updated in your cart. New quantity: ${foundProduct.quantity}.`
+            );
+          }
         }
       };
 
