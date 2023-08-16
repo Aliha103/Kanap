@@ -53,7 +53,7 @@ const showBasket = async () => {
     // Loop through each product in the fetched response
     responseFetch.forEach((product) => {
       // Generate HTML content for each product and append it to the cart container
-      zoneBasket.innerHTML += `<article class="cart__item" data-id="${product._id}" data-color="${product.color}">
+      zoneBasket.innerHTML += `<article class="cart__item" data-id="${product._id}" data-color="${product.color}" data-name="${product.name}">
               <div class="cart__item__img">
                 <img src="${product.img}" alt="Image of a sofa">
               </div>
@@ -92,6 +92,7 @@ async function modifyQuantity() {
     input.addEventListener("change", function () {
       //Listening for the quantity change.
       let basketValue = getBasket();
+      let productName = this.closest(".cart__item").dataset.name;
       //getting the ID of the modified data
       let idModif = this.closest(".cart__item").dataset.id;
       //getting the color of the modified data
@@ -105,8 +106,12 @@ async function modifyQuantity() {
         // If the color and ID are found, we modify the quantity accordingly
         if (findColor) {
           findColor.quantity = this.value;
-          // Update the basketValue and save it to local storage
-          localStorage.setItem("kanapLs", JSON.stringify(basketValue));
+          if (findColor.quantity > 101) {
+            alert("Product " + productName + " quantity is greater than 100");
+          } else {
+            // Update the basketValue and save it to local storage
+            localStorage.setItem("kanapLs", JSON.stringify(basketValue));
+          }
         }
 
         // Update the quantities and total price
