@@ -5,6 +5,9 @@
 https://aliha103.github.io/Kanap/front/html/index.html
 
 
+This project is designed to run on a Node.js server and is accessible through localhost:3000.
+
+
 This is the front end and back end server for Project 5 of the Web Developer path.
 
 ### Back end Prerequisites ###

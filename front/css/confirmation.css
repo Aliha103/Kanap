@@ -3,13 +3,16 @@
 /**************/
 .confirmation {
     display: flex;
+    flex-direction: column;
     justify-content: center;
-    margin-top: 85px;
+    align-items: center;
+    
     margin-bottom: 85px;
 }
 
 .confirmation p {
     background-color: white;
+    width: fit-content;
     color: #3d424f;
     text-align: center;
     font-weight: 500;
